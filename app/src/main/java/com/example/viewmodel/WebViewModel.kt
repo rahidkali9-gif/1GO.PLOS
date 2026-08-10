@@ -18,7 +18,7 @@ import java.net.URL
 class WebViewModel : ViewModel() {
 
     companion object {
-        const val DEFAULT_URL = "https://1goplus.com"
+        const val DEFAULT_URL = "https://1goplus.com/index.html?referrer=7061696425334436657362722532366368616e6e656c25334431676f2532366e6f6e63652533445054413451496275"
         private const val PREFS_NAME = "web_app_prefs"
         private const val KEY_ACTIVE_URL = "active_url"
         private const val KEY_ADMIN_API_URL = "admin_api_url"
@@ -42,9 +42,8 @@ class WebViewModel : ViewModel() {
     // URL Manager state
     private val _managedUrls = MutableStateFlow(
         listOf(
-            ManagedUrl(label = "1Go Default Portal", url = "https://1goplus.com", isActive = true),
-            ManagedUrl(label = "Hercules Real Money App", url = "https://1go-real-money.onhercules.app", isActive = false),
-            ManagedUrl(label = "Google Search", url = "https://www.google.com", isActive = false)
+            ManagedUrl(label = "1Go Games Portal", url = DEFAULT_URL, isActive = true),
+            ManagedUrl(label = "Direct Game 1Go", url = "https://1go.plus/6esbr", isActive = false)
         )
     )
     val managedUrls: StateFlow<List<ManagedUrl>> = _managedUrls.asStateFlow()
