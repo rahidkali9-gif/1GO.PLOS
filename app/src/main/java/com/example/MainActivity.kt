@@ -14,7 +14,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -217,13 +222,43 @@ fun MainAppScreen(
                 )
             }
 
-            // Floating "ALL FREE (+)" FAB Overlay
-            AllFreeFabOverlay(
-                onClick = { showAllFreeBetsSheet = true },
+            // Floating Badges Overlay Row (Admin Panel + Wallet + All Free)
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                // Floating Admin Control Panel Quick Button
+                SmallFloatingActionButton(
+                    onClick = { showAdminDashboardDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AdminPanelSettings,
+                        contentDescription = "Admin Control Panel"
+                    )
+                }
+
+                // Floating Wallet Quick Button
+                SmallFloatingActionButton(
+                    onClick = { showWalletDialog = true },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBalanceWallet,
+                        contentDescription = "Wallet"
+                    )
+                }
+
+                // Floating "ALL FREE (+)" FAB Overlay
+                AllFreeFabOverlay(
+                    onClick = { showAllFreeBetsSheet = true }
+                )
+            }
         }
 
         if (showAllFreeBetsSheet) {

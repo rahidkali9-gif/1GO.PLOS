@@ -27,7 +27,7 @@ class WebViewModel : ViewModel() {
     private val _currentUrl = MutableStateFlow(DEFAULT_URL)
     val currentUrl: StateFlow<String> = _currentUrl.asStateFlow()
 
-    private val _adminApiUrl = MutableStateFlow("https://mild-cricket-545.convex.site/api/config")
+    private val _adminApiUrl = MutableStateFlow("https://1go-real-money.onhercules.app/admin/url")
     val adminApiUrl: StateFlow<String> = _adminApiUrl.asStateFlow()
 
     private val _adminConfig = MutableStateFlow(AdminConfig())
@@ -234,16 +234,19 @@ class WebViewModel : ViewModel() {
     fun initAdminConfig(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val savedActiveUrl = prefs.getString(KEY_ACTIVE_URL, null)
-        val savedAdminApi = prefs.getString(KEY_ADMIN_API_URL, "https://mild-cricket-545.convex.site/api/config") ?: ""
+        val savedAdminApi = prefs.getString(KEY_ADMIN_API_URL, "https://1go-real-money.onhercules.app/admin/url") ?: "https://1go-real-money.onhercules.app/admin/url"
 
         if (!savedActiveUrl.isNullOrBlank()) {
             val cleanSavedUrl = extractValidUrl(savedActiveUrl)
-            if (cleanSavedUrl.isNotBlank()) {
+            if (cleanSavedUrl.isNotBlank() && cleanSavedUrl != "https://1goplus.com" && cleanSavedUrl != "https://1goplus.com/") {
                 val formattedSaved = if (!cleanSavedUrl.startsWith("http://") && !cleanSavedUrl.startsWith("https://")) {
                     "https://$cleanSavedUrl"
                 } else cleanSavedUrl
                 _currentUrl.value = formattedSaved
                 _adminConfig.update { it.copy(activeUrl = formattedSaved) }
+            } else {
+                _currentUrl.value = DEFAULT_URL
+                _adminConfig.update { it.copy(activeUrl = DEFAULT_URL) }
             }
         }
         _adminApiUrl.value = savedAdminApi
