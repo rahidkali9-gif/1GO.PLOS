@@ -1,0 +1,6 @@
+{
+  "name": "Web Connect",
+  "description": "Advanced Web App & Media Browser with image downloader, deep-link app integrations, and native web controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
