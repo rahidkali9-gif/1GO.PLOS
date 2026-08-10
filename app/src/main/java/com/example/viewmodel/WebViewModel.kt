@@ -27,7 +27,7 @@ class WebViewModel : ViewModel() {
     private val _currentUrl = MutableStateFlow(DEFAULT_URL)
     val currentUrl: StateFlow<String> = _currentUrl.asStateFlow()
 
-    private val _adminApiUrl = MutableStateFlow("https://1go-real-money.onhercules.app")
+    private val _adminApiUrl = MutableStateFlow("https://mild-cricket-545.convex.site/api/config")
     val adminApiUrl: StateFlow<String> = _adminApiUrl.asStateFlow()
 
     private val _adminConfig = MutableStateFlow(AdminConfig())
@@ -235,7 +235,7 @@ class WebViewModel : ViewModel() {
     fun initAdminConfig(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val savedActiveUrl = prefs.getString(KEY_ACTIVE_URL, null)
-        val savedAdminApi = prefs.getString(KEY_ADMIN_API_URL, "https://1go-real-money.onhercules.app") ?: ""
+        val savedAdminApi = prefs.getString(KEY_ADMIN_API_URL, "https://mild-cricket-545.convex.site/api/config") ?: ""
 
         if (!savedActiveUrl.isNullOrBlank()) {
             val cleanSavedUrl = extractValidUrl(savedActiveUrl)
@@ -268,7 +268,7 @@ class WebViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val targetEndpoint = if (formattedApiUrl.endsWith("/api/config")) {
+                val targetEndpoint = if (formattedApiUrl.endsWith("/api/config") || formattedApiUrl.contains("?")) {
                     formattedApiUrl
                 } else {
                     "${formattedApiUrl.trimEnd('/')}/api/config"
@@ -286,16 +286,35 @@ class WebViewModel : ViewModel() {
                 if (responseCode in 200..299) {
                     val responseText = conn.inputStream.bufferedReader().use { it.readText() }.trim()
                     var extractedActiveUrl = extractValidUrl(responseText)
-                    var paymentEnabled = true
-                    var walletEnabled = true
-                    var withdrawalEnabled = true
+                    var currentConfig = _adminConfig.value
+
+                    var paymentEnabled = currentConfig.paymentEnabled
+                    var walletEnabled = currentConfig.walletEnabled
+                    var withdrawalEnabled = currentConfig.withdrawalEnabled
+                    var merchantUpi = currentConfig.merchantUpiId
+                    var merchantName = currentConfig.merchantName
+                    var bankName = currentConfig.adminBankName
+                    var accountNo = currentConfig.adminAccountNo
+                    var ifscCode = currentConfig.adminIfscCode
+                    var accountHolder = currentConfig.adminAccountHolder
+                    var phoneNo = currentConfig.adminPhoneNo
+                    var autoTransfer = currentConfig.autoTransferEnabled
 
                     if (responseText.startsWith("{")) {
                         try {
                             val json = JSONObject(responseText)
-                            paymentEnabled = json.optBoolean("payment_enabled", true)
-                            walletEnabled = json.optBoolean("wallet_enabled", true)
-                            withdrawalEnabled = json.optBoolean("withdrawal_enabled", true)
+                            paymentEnabled = json.optBoolean("payment_enabled", json.optBoolean("paymentEnabled", paymentEnabled))
+                            walletEnabled = json.optBoolean("wallet_enabled", json.optBoolean("walletEnabled", walletEnabled))
+                            withdrawalEnabled = json.optBoolean("withdrawal_enabled", json.optBoolean("withdrawalEnabled", withdrawalEnabled))
+                            
+                            merchantUpi = json.optString("merchant_upi_id", json.optString("upi_id", json.optString("merchantUpiId", merchantUpi)))
+                            merchantName = json.optString("merchant_name", json.optString("merchantName", merchantName))
+                            bankName = json.optString("admin_bank_name", json.optString("bank_name", json.optString("bankName", bankName)))
+                            accountNo = json.optString("admin_account_no", json.optString("account_no", json.optString("accountNo", accountNo)))
+                            ifscCode = json.optString("admin_ifsc_code", json.optString("ifsc_code", json.optString("ifscCode", ifscCode)))
+                            accountHolder = json.optString("admin_account_holder", json.optString("account_holder", json.optString("accountHolder", accountHolder)))
+                            phoneNo = json.optString("admin_phone_no", json.optString("phone_no", json.optString("phoneNo", phoneNo)))
+                            autoTransfer = json.optBoolean("auto_transfer_enabled", json.optBoolean("autoTransferEnabled", autoTransfer))
                         } catch (_: Exception) {}
                     }
 
@@ -311,7 +330,15 @@ class WebViewModel : ViewModel() {
                                     activeUrl = finalUrl,
                                     paymentEnabled = paymentEnabled,
                                     walletEnabled = walletEnabled,
-                                    withdrawalEnabled = withdrawalEnabled
+                                    withdrawalEnabled = withdrawalEnabled,
+                                    merchantUpiId = merchantUpi,
+                                    merchantName = merchantName,
+                                    adminBankName = bankName,
+                                    adminAccountNo = accountNo,
+                                    adminIfscCode = ifscCode,
+                                    adminAccountHolder = accountHolder,
+                                    adminPhoneNo = phoneNo,
+                                    autoTransferEnabled = autoTransfer
                                 )
                             }
                             _adminSyncStatus.value = "Synced: $finalUrl"
@@ -323,11 +350,11 @@ class WebViewModel : ViewModel() {
                                 .putString(KEY_ADMIN_API_URL, formattedApiUrl)
                                 .apply()
 
-                            logAudit("CONFIG_SYNC", "Admin API Sync", "Previous", finalUrl)
+                            logAudit("CONFIG_SYNC", "Admin API Sync", "Synced Endpoint", finalUrl)
                         }
                     } else {
                         withContext(Dispatchers.Main) {
-                            _adminSyncStatus.value = "Connected (Default Active URL active)"
+                            _adminSyncStatus.value = "Connected (API active)"
                             _isFetchingAdminUrl.value = false
                         }
                     }
