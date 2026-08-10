@@ -22,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -374,6 +376,89 @@ fun WalletDialog(
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text("Confirm & Verify Server Payment")
                                             }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Admin Bank Deposit Card for Direct Bank Transfer
+                            val clipboardManager = LocalClipboardManager.current
+                            OutlinedCard(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.AccountBalance,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            "Admin Deposit Bank Account & UPI",
+                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(6.dp))
+
+                                    Text("Holder: ${adminConfig.adminAccountHolder}", style = MaterialTheme.typography.bodySmall)
+                                    Text("Bank: ${adminConfig.adminBankName}", style = MaterialTheme.typography.bodySmall)
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("A/C: ${adminConfig.adminAccountNo}", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium))
+                                        TextButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(adminConfig.adminAccountNo))
+                                                Toast.makeText(context, "Account No Copied!", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.height(32.dp)
+                                        ) {
+                                            Text("Copy A/C", fontSize = 11.sp)
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("IFSC: ${adminConfig.adminIfscCode}", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium))
+                                        TextButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(adminConfig.adminIfscCode))
+                                                Toast.makeText(context, "IFSC Copied!", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.height(32.dp)
+                                        ) {
+                                            Text("Copy IFSC", fontSize = 11.sp)
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("UPI ID: ${adminConfig.merchantUpiId}", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium))
+                                        TextButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(adminConfig.merchantUpiId))
+                                                Toast.makeText(context, "UPI ID Copied!", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.height(32.dp)
+                                        ) {
+                                            Text("Copy UPI", fontSize = 11.sp)
                                         }
                                     }
                                 }

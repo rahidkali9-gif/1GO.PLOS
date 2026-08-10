@@ -49,10 +49,11 @@ fun AdminDashboardDialog(
     onVerifyPayment: (orderId: String, gatewayTxnRef: String, isSuccess: Boolean) -> Unit,
     onToggleUserLock: (userId: String) -> Unit,
     onExportCsv: () -> String,
+    onUpdateBankDetails: (bankName: String, accountNo: String, ifscCode: String, accountHolder: String, upiId: String, phoneNo: String, autoTransfer: Boolean) -> Unit = { _, _, _, _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var selectedSection by remember { mutableIntStateOf(0) } // 0 = Dashboard, 1 = URL Manager, 2 = Withdrawals, 3 = Users, 4 = Audit Logs
+    var selectedSection by remember { mutableIntStateOf(0) } // 0 = Dashboard, 1 = URL Manager, 2 = Withdrawals, 3 = Bank Setup, 4 = Users, 5 = Audit Logs
 
     // URL Manager Inputs
     var newUrlLabel by remember { mutableStateOf("") }
@@ -61,6 +62,15 @@ fun AdminDashboardDialog(
 
     // Admin Sync Endpoint Input
     var apiEndpointInput by remember { mutableStateOf(adminApiUrl) }
+
+    // Admin Bank Setup State
+    var bankNameText by remember { mutableStateOf(adminConfig.adminBankName) }
+    var bankAccountNoText by remember { mutableStateOf(adminConfig.adminAccountNo) }
+    var bankIfscText by remember { mutableStateOf(adminConfig.adminIfscCode) }
+    var bankHolderText by remember { mutableStateOf(adminConfig.adminAccountHolder) }
+    var merchantUpiText by remember { mutableStateOf(adminConfig.merchantUpiId) }
+    var merchantPhoneText by remember { mutableStateOf(adminConfig.adminPhoneNo) }
+    var autoTransferChecked by remember { mutableStateOf(adminConfig.autoTransferEnabled) }
 
     val dateFormat = remember { SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()) }
 
@@ -153,12 +163,18 @@ fun AdminDashboardDialog(
                     Tab(
                         selected = selectedSection == 3,
                         onClick = { selectedSection = 3 },
-                        text = { Text("Users (${usersList.size})", fontSize = 12.sp) },
-                        icon = { Icon(Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        text = { Text("Bank Setup", fontSize = 12.sp) },
+                        icon = { Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(18.dp)) }
                     )
                     Tab(
                         selected = selectedSection == 4,
                         onClick = { selectedSection = 4 },
+                        text = { Text("Users (${usersList.size})", fontSize = 12.sp) },
+                        icon = { Icon(Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    )
+                    Tab(
+                        selected = selectedSection == 5,
+                        onClick = { selectedSection = 5 },
                         text = { Text("Audit Logs", fontSize = 12.sp) },
                         icon = { Icon(Icons.Outlined.History, contentDescription = null, modifier = Modifier.size(18.dp)) }
                     )
@@ -490,8 +506,132 @@ fun AdminDashboardDialog(
                         }
                     }
 
-                    // SECTION 3: USERS LIST & LOCK/UNLOCK
+                    // SECTION 3: BANK ACCOUNT & PAYOUT SETUP
                     3 -> {
+                        Column {
+                            Text(
+                                text = "Admin Bank Account & UPI Setup",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text = "Set up your Admin Bank Account & UPI for receiving user deposits and sending payouts.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 280.dp)
+                            ) {
+                                item {
+                                    OutlinedTextField(
+                                        value = bankHolderText,
+                                        onValueChange = { bankHolderText = it },
+                                        label = { Text("Account Holder Name") },
+                                        leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_bank_holder_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedTextField(
+                                        value = bankNameText,
+                                        onValueChange = { bankNameText = it },
+                                        label = { Text("Bank Name") },
+                                        leadingIcon = { Icon(Icons.Outlined.AccountBalance, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_bank_name_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedTextField(
+                                        value = bankAccountNoText,
+                                        onValueChange = { bankAccountNoText = it },
+                                        label = { Text("Bank Account Number") },
+                                        leadingIcon = { Icon(Icons.Outlined.Numbers, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_bank_account_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedTextField(
+                                        value = bankIfscText,
+                                        onValueChange = { bankIfscText = it },
+                                        label = { Text("IFSC Code") },
+                                        leadingIcon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_bank_ifsc_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedTextField(
+                                        value = merchantUpiText,
+                                        onValueChange = { merchantUpiText = it },
+                                        label = { Text("Merchant / Admin UPI ID") },
+                                        leadingIcon = { Icon(Icons.Outlined.Payment, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_upi_id_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    OutlinedTextField(
+                                        value = merchantPhoneText,
+                                        onValueChange = { merchantPhoneText = it },
+                                        label = { Text("PhonePe / GPay / Paytm Mobile No") },
+                                        leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth().testTag("admin_phone_input")
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Checkbox(
+                                            checked = autoTransferChecked,
+                                            onCheckedChange = { autoTransferChecked = it }
+                                        )
+                                        Text("Enable Instant Auto-Transfer & Settlement", style = MaterialTheme.typography.bodySmall)
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Button(
+                                        onClick = {
+                                            onUpdateBankDetails(
+                                                bankNameText,
+                                                bankAccountNoText,
+                                                bankIfscText,
+                                                bankHolderText,
+                                                merchantUpiText,
+                                                merchantPhoneText,
+                                                autoTransferChecked
+                                            )
+                                            Toast.makeText(context, "Admin Bank Details & UPI Updated!", Toast.LENGTH_LONG).show()
+                                        },
+                                        modifier = Modifier.fillMaxWidth().testTag("save_bank_details_button")
+                                    ) {
+                                        Icon(Icons.Default.Save, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Save Admin Bank & UPI Credentials")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // SECTION 4: USERS LIST & LOCK/UNLOCK
+                    4 -> {
                         Column {
                             Text(
                                 text = "Registered Users Directory",
@@ -548,8 +688,8 @@ fun AdminDashboardDialog(
                         }
                     }
 
-                    // SECTION 4: AUDIT LOGS
-                    4 -> {
+                    // SECTION 5: AUDIT LOGS
+                    5 -> {
                         Column {
                             Text(
                                 text = "Immutable System Audit Logs",

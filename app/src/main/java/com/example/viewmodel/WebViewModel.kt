@@ -570,6 +570,30 @@ class WebViewModel : ViewModel() {
         }
     }
 
+    // --- ADMIN BANK & PAYOUT SETUP ---
+    fun updateAdminBankDetails(
+        bankName: String,
+        accountNo: String,
+        ifscCode: String,
+        accountHolder: String,
+        upiId: String,
+        phoneNo: String,
+        autoTransfer: Boolean
+    ) {
+        _adminConfig.update {
+            it.copy(
+                adminBankName = bankName.ifBlank { "State Bank of India" },
+                adminAccountNo = accountNo.ifBlank { "918203910293" },
+                adminIfscCode = ifscCode.ifBlank { "SBIN0001024" },
+                adminAccountHolder = accountHolder.ifBlank { "1Go Official Admin" },
+                merchantUpiId = upiId.ifBlank { "1goplus@upi" },
+                adminPhoneNo = phoneNo.ifBlank { "9876543210" },
+                autoTransferEnabled = autoTransfer
+            )
+        }
+        logAudit("ADMIN_BANK_UPDATED", "Bank Account Setup", "Updated A/C", "$accountNo ($ifscCode)")
+    }
+
     // --- USER MANAGEMENT ---
     fun toggleUserLockStatus(userId: String) {
         _usersList.update { list ->

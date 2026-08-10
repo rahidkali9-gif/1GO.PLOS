@@ -279,7 +279,10 @@ fun MainAppScreen(
                 onProcessWithdrawal = { reqId, approve, notes -> viewModel.processWithdrawalByAdmin(reqId, approve, notes) },
                 onVerifyPayment = { orderId, ref, success -> viewModel.verifyAndCompletePaymentServerSide(orderId, ref, success) },
                 onToggleUserLock = { userId -> viewModel.toggleUserLockStatus(userId) },
-                onExportCsv = { viewModel.exportTransactionsCsv() }
+                onExportCsv = { viewModel.exportTransactionsCsv() },
+                onUpdateBankDetails = { bankName, accountNo, ifscCode, holder, upiId, phoneNo, autoTransfer ->
+                    viewModel.updateAdminBankDetails(bankName, accountNo, ifscCode, holder, upiId, phoneNo, autoTransfer)
+                }
             )
         }
     }

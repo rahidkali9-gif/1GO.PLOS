@@ -28,7 +28,13 @@ data class AdminConfig(
     val withdrawalEnabled: Boolean = true,
     val appVersion: Int = 1,
     val merchantUpiId: String = "1goplus@upi",
-    val merchantName: String = "1GoPlus Pay"
+    val merchantName: String = "1GoPlus Pay",
+    val adminBankName: String = "State Bank of India",
+    val adminAccountNo: String = "918203910293",
+    val adminIfscCode: String = "SBIN0001024",
+    val adminAccountHolder: String = "1Go Official Admin",
+    val adminPhoneNo: String = "9876543210",
+    val autoTransferEnabled: Boolean = true
 )
 
 data class WalletState(
